@@ -1,3 +1,5 @@
+library(forcats)
+
 get_path_to_data <- function(file_name){
 
   # get user's username
@@ -44,3 +46,16 @@ filter_for_divisions <- function(df, ...){
 
 
 }
+
+
+
+
+recode_strongly_levels <- function(x){
+
+  # This function recodes the 'Strongly agree' and 'Strongly disagree' levels
+  # to 'Agree' and 'Disagree'
+
+  x %>% fct_recode("Agree" = "Strongly agree", "Disagree" = "Strongly disagree")
+
+}
+

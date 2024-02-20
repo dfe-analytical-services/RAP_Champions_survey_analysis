@@ -1,3 +1,8 @@
+
+# ---- Column Names ----
+
+## ---- New Column Names ----
+
 new_column_names <- c("ID",
                       "Start_Time",
                       "End_Time",
@@ -44,7 +49,7 @@ new_column_names <- c("ID",
 
 
 
-
+## ---- Likert Columns ----
 
 ranked_columns <- c("repetitive_tasks",
                     "figuring_out_existing_processes_time_consuming",
@@ -73,20 +78,41 @@ ranked_columns <- c("repetitive_tasks",
                     "nervous_about_RAP_LM",
                     "know_where_help_LM")
 
+## ---- Yes/No Columns ----
+
+y_n_cols <- c("copy_and_paste_atm",
+              "collab_version_control_atm",
+              "line_manager")
+
+
+# ---- Likert Factors ----
+
 ranking_factors <- c('Strongly agree',
                      'Agree',
                      'Neutral',
                      'Disagree',
                      'Strongly disagree')
 
-ranking_dictionary = list('Strongly agree' = 5,
-                          'Agree' = 4,
-                          'Neutral' = 3,
-                          'Disagree' = 2,
-                          'Strongly disagree' = 1,
-                          'empty' = NA)
+
+# ---- Colours ----
+
+# Use the analytical function colour palette
+
+colours <- af_colours('categorical', 'hex', 5) %>%
+  suppressMessages()
+
+colours_sequential<- af_colours('sequential', 'hex') %>%
+  suppressMessages()
+
+# I wish we were in python with dictionary comprehension...
+likert_colours <- c('Strongly agree' = colours[1],
+                     'Agree' = colours[2],
+                     'Neutral' = colours[3],
+                     'Disagree' = colours[4],
+                     'Strongly disagree' = colours[5])
 
 
-y_n_cols <- c("copy_and_paste_atm",
-              "collab_version_control_atm",
-              "line_manager")
+likert_colours_sequential <- c('Agree' = colours_sequential[1],
+                               'Neutral' = colours_sequential[2],
+                               'Disagree' = colours_sequential[3]
+                               )
