@@ -30,10 +30,8 @@ get_path_to_data <- function(file_name){
 #' @export
 #'
 #' @examples
-filter_for_divisions <- function(df, ...){
+filter_for_divisions <- function(df, divisions_list){
 
-
-  divisions_list <- list(...)
 
   if('all' %in% divisions_list | 'All' %in% divisions_list){
     return(df)
@@ -56,6 +54,25 @@ recode_strongly_levels <- function(x){
   # to 'Agree' and 'Disagree'
 
   x %>% fct_recode("Agree" = "Strongly agree", "Disagree" = "Strongly disagree")
+
+}
+
+
+
+get_correlation <- function(df, col1, col2){
+
+  # this function takes a dataframe and gets the correlation between two
+  # of its columns
+
+  x <- df[[col1]] %>%
+    as.numeric()
+
+  y <- df[[col2]] %>%
+    as.numeric()
+
+
+  return(cor(x, y))
+
 
 }
 

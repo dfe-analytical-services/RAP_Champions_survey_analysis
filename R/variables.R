@@ -93,23 +93,42 @@ ranking_factors <- c('Strongly agree',
                      'Disagree',
                      'Strongly disagree')
 
+numerical_ranking_factors <- c('0','1','2','3','4')
+
+likert_scale_dictionary <- c('Strongly agree' = 4,
+                             'Agree' = 3,
+                             'Neutral' = 2,
+                             'Disagree' = 1,
+                             'Strongly disagree' = 0)
+
+
+
 
 # ---- Colours ----
 
 # Use the analytical function colour palette
 
-colours <- af_colours('categorical', 'hex', 5) %>%
-  suppressMessages()
+#colours <- af_colours('categorical', 'hex', 5) %>%
+  #suppressMessages()
 
 colours_sequential<- af_colours('sequential', 'hex') %>%
   suppressMessages()
 
+RG_colours <- c("#922B21", "#E74C3C", "#D5DBDB", "#16c95b", "#045423")
+
+
 # I wish we were in python with dictionary comprehension...
-likert_colours <- c('Strongly agree' = colours[1],
-                     'Agree' = colours[2],
-                     'Neutral' = colours[3],
-                     'Disagree' = colours[4],
-                     'Strongly disagree' = colours[5])
+likert_colours <- c('Strongly disagree' = RG_colours[1],
+                     'Disagree' = RG_colours[2],
+                     'Neutral' = RG_colours[3],
+                     'Agree' = RG_colours[4],
+                     'Strongly agree' = RG_colours[5])
+
+numerical_likert_colours <- c('0' = RG_colours[1],
+                    '1' = RG_colours[2],
+                    '2' = RG_colours[3],
+                    '3' = RG_colours[4],
+                    '4' = RG_colours[5])
 
 
 likert_colours_sequential <- c('Agree' = colours_sequential[1],

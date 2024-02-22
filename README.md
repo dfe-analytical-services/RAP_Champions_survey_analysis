@@ -28,3 +28,5 @@ This project currently only contains basic analysis so you'll need to add your o
 ## Using the code
 
 The main script you will need to use and adapt is `analyse_survey.R`. You can change and add to this file as much as you like, but if you want to push your project ever consider leaving it as it is and creating your own file to analyse your division.
+
+It contains some summary statistics, some correlation, and few bar charts and a scatter plot for you to play around with.

@@ -15,9 +15,43 @@ source(here('R', 'visualisations.R'))
 
 # ---- Get Data by Division ----
 
-# put your division(s) in this function. "All" will keep all divisions.
+# put your division(s) in this list. "All" will keep all divisions.
+
+choose_divisions <- c("All")
+
 division_data <- RAP_full %>%
-  filter_for_divisions("All")
+  filter_for_divisions(choose_divisions)
+
+division_data_numerical <- RAP_full_numerical%>%
+  filter_for_divisions(choose_divisions)
+
+
+
+# ---- Statistics ----
+
+## ---- Descriptive Statistics ----
+
+# choose the columns you want
+columns_for_stats <- c("I_use_code", "comfortable_with_code", "open_source_tools")
+
+# generates statistical data for the columns selected above
+division_data_numerical %>%
+  select(all_of(columns_for_stats)) %>%
+  summary()
+
+
+
+## ---- Correlation ----
+
+# choose two columns to find correlation
+column_1 <- "repetitive_tasks"
+column_2 <- "figuring_out_existing_processes_time_consuming"
+
+# get_correlation is a simple function in helpers.R
+division_data_numerical %>%
+  get_correlation(column_1, column_2)
+
+# there's a scatter plot later too
 
 
 # ---- Basic Plots ----
@@ -48,9 +82,8 @@ choose_questions <- c("I_have_RAP_skills", "I_have_RAP_support", "I_have_RAP_tim
 
 ### ---- 5 Responses ----
 
-# bit of a problem with colour in the 5-response version
-# af_colours doesn't like using 5 colours
-# you could just define your own colour sequence tbh
+# choose your own colour dictionary
+# here ChatGPT has produced red to green hex values for me
 
 division_data %>%
   stacked_bar_chart(choose_questions, likert_colours)
@@ -67,4 +100,25 @@ division_data %>%
   stacked_bar_chart(choose_questions, likert_colours_sequential)
 
 
+
+## ---- Scatter Plot ----
+
+# for visualising correlation
+
+# choose your columns
+column_1_scatter <- "understand_RAP"
+column_2_scatter <- "RAP_is_best"
+colour_column <- "I_have_RAP_skills"
+
+division_data %>%
+  scatter_plot(column_1_scatter, column_2_scatter, colour_column)
+
+# in case you want to see the correlation here too
+division_data_numerical %>%
+  get_correlation(column_1_scatter, column_2_scatter)
+
+
+# you can also do one without colour
+division_data %>%
+    scatter_plot("I_use_code", "manager_encouragement")
 

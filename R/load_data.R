@@ -69,3 +69,18 @@ RAP_full <- RAP_full %>%
   ungroup()
 
 
+
+# ---- Numerical Version ----
+
+# we have to turn the values into numerical data for some things -- I have just
+# used a five point scale from 0 - 4, strongly disagree - strongly agree.
+RAP_full_numerical <- RAP_full %>%
+  rowwise() %>%
+  mutate(across(all_of(ranked_columns), ~likert_scale_dictionary[as.character(.)])) %>%
+  ungroup()
+
+# make columns factors
+RAP_full_numerical[ranked_columns] <- lapply(RAP_full_numerical[ranked_columns],
+                                                  factor,
+                                                  levels = numerical_ranking_factors)
+
