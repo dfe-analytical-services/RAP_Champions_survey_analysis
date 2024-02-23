@@ -91,7 +91,7 @@ ranking_factors <- c('Strongly agree',
                      'Agree',
                      'Neutral',
                      'Disagree',
-                     'Strongly disagree')
+                     'Strongly disagree') %>% rev()
 
 numerical_ranking_factors <- c('0','1','2','3','4')
 
@@ -110,6 +110,8 @@ likert_scale_dictionary <- c('Strongly agree' = 4,
 
 #colours <- af_colours('categorical', 'hex', 5) %>%
   #suppressMessages()
+
+af_blue <- af_colours('duo')[1]
 
 colours_sequential<- af_colours('sequential', 'hex') %>%
   suppressMessages()

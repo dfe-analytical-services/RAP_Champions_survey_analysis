@@ -35,10 +35,11 @@ division_data_numerical <- RAP_full_numerical%>%
 columns_for_stats <- c("I_use_code", "comfortable_with_code", "open_source_tools")
 
 # generates statistical data for the columns selected above
+# https://stackoverflow.com/questions/3418128/how-to-convert-a-factor-to-integer-numeric-without-loss-of-information
 division_data_numerical %>%
   select(all_of(columns_for_stats)) %>%
+  mutate(across(all_of(columns_for_stats), ~as.numeric(levels(.))[.])) %>%
   summary()
-
 
 
 ## ---- Correlation ----
@@ -65,10 +66,11 @@ column_to_plot <- "comfortable_with_code"
 counted_data <- division_data %>%
   count(.data[[column_to_plot]], .drop = FALSE)
 
+
 # plot
 counted_data %>%
   ggplot(aes(x = .data[[column_to_plot]], y = n)) +
-  geom_bar(stat = "identity") +
+  geom_bar(stat = "identity", fill = af_blue, colour = af_blue) +
   theme_minimal() +
   labs(x = "Response", y = "Count", title = column_names_dictionary[column_to_plot])
 
@@ -88,7 +90,6 @@ choose_questions <- c("I_have_RAP_skills", "I_have_RAP_support", "I_have_RAP_tim
 division_data %>%
   stacked_bar_chart(choose_questions, likert_colours)
 
-
 ### ---- 3 Responses ----
 
 # Here I have combined the positive responses and the negative responses to
@@ -98,7 +99,6 @@ division_data %>%
 division_data %>%
   mutate(across(all_of(ranked_columns), ~recode_strongly_levels(.))) %>%
   stacked_bar_chart(choose_questions, likert_colours_sequential)
-
 
 
 ## ---- Scatter Plot ----

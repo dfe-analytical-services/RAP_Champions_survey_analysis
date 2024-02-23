@@ -13,7 +13,7 @@ stacked_bar_chart <- function(df, questions, colours){
 
   # make columns factors, easier to plot and colour
   data_for_stacked_chart$response <- data_for_stacked_chart$response %>%
-    factor(levels = ranking_factors)
+    factor(levels = rev(ranking_factors))
 
 
   # plot
@@ -40,7 +40,7 @@ scatter_plot <- function(df, question1, question2, colour_col = NULL){
 
   division_data_scatter <- df %>%
     rowwise() %>%
-    mutate(across(all_of(scatter_columns), ~likert_scale_dictionary[.])) %>%
+    mutate(across(all_of(scatter_columns), ~likert_scale_dictionary[as.character(.)])) %>%
     ungroup()
 
   # make columns factors

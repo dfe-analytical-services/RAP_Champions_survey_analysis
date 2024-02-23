@@ -53,7 +53,7 @@ recode_strongly_levels <- function(x){
   # This function recodes the 'Strongly agree' and 'Strongly disagree' levels
   # to 'Agree' and 'Disagree'
 
-  x %>% fct_recode("Agree" = "Strongly agree", "Disagree" = "Strongly disagree")
+  x %>% fct_recode("Disagree" = "Strongly disagree", "Agree" = "Strongly agree")
 
 }
 
