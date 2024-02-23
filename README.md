@@ -23,6 +23,8 @@ To clone this project:
 
 3. Start a new R project and select Version Control > Git > [paste in url]
 
+4. Run `renv::restore` to install all the packages you need.
+
 This project currently only contains basic analysis so you'll need to add your own after you've cloned it. If you'd like to contribute to this project collaboratively, speak to Charlotte Foster and she will give you push permission. You won't be able to push until you do this!
 
 ## Using the code
