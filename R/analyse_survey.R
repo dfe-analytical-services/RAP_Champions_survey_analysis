@@ -110,6 +110,7 @@ column_1_scatter <- "understand_RAP"
 column_2_scatter <- "RAP_is_best"
 colour_column <- "I_have_RAP_skills"
 
+# you'll want to click the Zoom or Export button to see this properly
 division_data %>%
   scatter_plot(column_1_scatter, column_2_scatter, colour_column)
 
