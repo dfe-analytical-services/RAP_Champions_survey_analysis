@@ -38,7 +38,7 @@ filter_for_divisions <- function(df, divisions_list){
   }
 
   division_data <- df %>%
-    filter(grepl(paste(divisions_list, collapse = "|"), division))
+    filter(grepl(paste(divisions_list, collapse = "|"), division), fixed = TRUE)
 
   return(division_data)
 

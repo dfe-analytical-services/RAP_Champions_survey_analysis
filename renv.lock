@@ -383,13 +383,13 @@
     },
     "renv": {
       "Package": "renv",
-      "Version": "0.17.2",
+      "Version": "1.0.5",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "utils"
       ],
-      "Hash": "aaf3c7f769695266a2113db67a25148b"
+      "Hash": "32c3f93e8360f667ca5863272ec8ba6a"
     },
     "rlang": {
       "Package": "rlang",

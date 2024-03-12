@@ -3,6 +3,9 @@
 
 library(dplyr)
 library(here)
+library(afcolours)
+
+source(here('R', 'helpers.R'))
 
 # load variables from the variables.R file
 source(here('R', 'variables.R'))
@@ -67,7 +70,6 @@ RAP_full <- RAP_full %>%
   mutate(across(all_of(y_n_cols), ~ifelse(.=="", NA, .)),
          across(all_of(y_n_cols), ~ifelse(. == 'Yes', T, ifelse(is.na(.), ., F)))) %>%
   ungroup()
-
 
 
 # ---- Numerical Version ----

@@ -17,14 +17,13 @@ source(here('R', 'visualisations.R'))
 
 # put your division(s) in this list. "All" will keep all divisions.
 
-choose_divisions <- c("All")
+choose_divisions <- c("Insight and Statistics")
 
 division_data <- RAP_full %>%
   filter_for_divisions(choose_divisions)
 
 division_data_numerical <- RAP_full_numerical%>%
   filter_for_divisions(choose_divisions)
-
 
 
 # ---- Statistics ----
@@ -123,3 +122,6 @@ division_data_numerical %>%
 division_data %>%
     scatter_plot("I_use_code", "manager_encouragement")
 
+
+division_data_numerical %>%
+  get_correlation("I_use_code", "manager_encouragement")
