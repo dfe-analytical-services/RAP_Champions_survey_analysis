@@ -1,5 +1,3 @@
-
-
 # ---- Load Packages ----
 
 library(here)
@@ -17,13 +15,14 @@ source(here('R', 'visualisations.R'))
 
 # put your division(s) in this list. "All" will keep all divisions.
 
-choose_divisions <- c("Insight and Statistics")
+choose_divisions <- c("Regions Group")
 
 division_data <- RAP_full %>%
   filter_for_divisions(choose_divisions)
 
 division_data_numerical <- RAP_full_numerical%>%
   filter_for_divisions(choose_divisions)
+
 
 
 # ---- Statistics ----
@@ -70,7 +69,9 @@ counted_data <- division_data %>%
 counted_data %>%
   ggplot(aes(x = .data[[column_to_plot]], y = n)) +
   geom_bar(stat = "identity", fill = af_blue, colour = af_blue) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = max(counted_data$n))) +
   theme_minimal() +
+  theme(panel.grid.minor = element_blank()) +
   labs(x = "Response", y = "Count", title = column_names_dictionary[column_to_plot])
 
 
@@ -125,3 +126,14 @@ division_data %>%
 
 division_data_numerical %>%
   get_correlation("I_use_code", "manager_encouragement")
+
+
+
+# Counts of the summary stats
+
+# Spider plots
+
+# We are looking for information on:
+# - Most common/important needs in your area
+# - Biggest problems for people in your area when attempting RAP
+# - Ideas to support the people in your area with RAP
