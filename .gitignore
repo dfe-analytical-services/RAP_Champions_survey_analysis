@@ -3,3 +3,6 @@
 .RData
 .Ruserdata
 data/
+*.html
+Outputs/
+/.quarto/

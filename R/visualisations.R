@@ -80,3 +80,30 @@ scatter_plot <- function(df, question1, question2, colour_col = NULL){
 
 
 }
+
+
+
+waffle_pop_plot <- function(df_div,
+                            df_all = RAP_full) {
+
+  div_pop <- nrow(df_div)
+  total_pop <- nrow(df_all)
+
+  plot_pop <- data.frame(group = c("Regions Group", "Total"),
+                         respondents = c(div_pop, total_pop))
+
+  division_nm <- DescTools::Mode(df_div$Group)[[1]]
+  rg_perc_respond <- floor(div_pop/total_pop*100)
+
+
+  ggplot(plot_pop, aes(fill = group, values = respondents)) +
+    geom_waffle(n_rows = 8, size = 0.33, colour = "white") +
+    scale_fill_manual(name = NULL,
+                      values = af_colours(type = "focus", 'hex') |> suppressMessages()) +
+    coord_equal() +
+    theme_void() +
+    labs(title = glue("{division_nm} made up {rg_perc_respond}% of responses"),
+         subtitle = paste0("Waffle plot to show the number of responses to the RAP survery",
+                           " in columns of 8")) +
+    theme(legend.position = "bottom")
+}

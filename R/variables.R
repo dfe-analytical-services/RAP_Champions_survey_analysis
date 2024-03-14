@@ -101,7 +101,13 @@ likert_scale_dictionary <- c('Strongly agree' = 4,
                              'Disagree' = 1,
                              'Strongly disagree' = 0)
 
+bi_numerical_ranking_factors <- c('-2','-1','0','1','2')
 
+bi_likert_scale_dictionary <- c('Strongly agree' = 2,
+                             'Agree' = 1,
+                             'Neutral' = 0,
+                             'Disagree' = -1,
+                             'Strongly disagree' = -2)
 
 
 # ---- Colours ----

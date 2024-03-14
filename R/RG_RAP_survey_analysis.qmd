@@ -1,0 +1,194 @@
+---
+title: "Regions Group RAP survey results"
+author: "Jake Tufts"
+date-modified: "`r Sys.Date()`"
+format: 
+  html:
+    embed-resources: true
+---
+
+## Introduction
+
+This Quarto document analyses the 2023 (early 2024) RAP Survey results for the Regions Group division. The areas focused on are:
+
+- Most common/important needs in your area
+- Biggest problems for people in your area when attempting RAP
+- Ideas to support the people in your area with RAP
+
+
+```{r}
+#| label: load
+#| echo: false
+#| output: false
+
+library(here)
+library(ggplot2)
+library(afcolours)
+library(glue)
+library(waffle)
+source(here('R', 'helpers.R'))
+source(here('R', 'load_data.R'))
+source(here('R', 'visualisations.R'))
+
+# Subset results for RG
+choose_divisions <- c("Regions Group")
+
+division_data <- RAP_full %>%
+  filter_for_divisions(choose_divisions)
+```
+
+
+
+## Population
+
+Here we look at the Regions Group population.
+
+```{r}
+#| label: waffle-plot
+#| echo: false
+
+waffle_pop_plot(df_div = division_data,
+                df_all = RAP_full)
+
+num_rg_resp <- nrow(division_data)
+
+```
+
+
+There were `r num_rg_resp` responses, of which came from `r length(unique(division_data$Email))` different respondents.
+
+
+## Most common needs
+
+
+```{r}
+#| label: needs-bar
+#| echo: false
+
+# Convert to bi-polar likert scale
+bi_division_data_numerical <- rank_to_num(df = division_data,
+                                       ranked_columns = ranked_columns,
+                                       likert_scale_dictionary = bi_likert_scale_dictionary,
+                                       numerical_ranking_factors = bi_numerical_ranking_factors)
+
+# Organisation cols
+org_cols <- division_data |> 
+  select(1:which(names(division_data)=="Group")) |> 
+  colnames()
+
+# Convert num survey qs to long
+div_data_num_long <- bi_division_data_numerical |>
+  select("ID", all_of(ranked_columns)) |>
+  tidyr::pivot_longer(cols = all_of(ranked_columns),
+                      names_to = "rank_q",
+                      values_to = "rank")
+
+needs_cols <- c("repetitive_tasks", "figuring_out_existing_processes_time_consuming",
+                "someone_else_could_run", "re-run_old_versions", "QA_manual_checks")
+
+# Dataframe storing rank values
+sum_ranks <- data.frame(rank = ranking_factors, value = as.numeric(numerical_ranking_factors))
+
+
+# Bar chart
+div_data_num_long |> 
+  filter(rank_q %in% needs_cols) |> 
+  summarise(total_rank = mean(as.numeric(levels(rank))[rank]),
+            .by = c("rank_q")) |> 
+  arrange(desc(total_rank)) |> 
+  mutate(rank_q = factor(rank_q, levels = rank_q)) |> 
+  ggplot(aes(x = rank_q, y = total_rank)) +
+  geom_col(fill = af_blue, colour = af_blue) +
+  lapply(1:nrow(sum_ranks), function(i) {
+    geom_hline(aes(yintercept = sum_ranks$value[i]), color = RG_colours[i], linetype = "dashed")
+  }) +
+  geom_text(aes(x = Inf, y = sum_ranks$value[1], label = sum_ranks$rank[1]),
+              hjust = 1.2, color = RG_colours[1], vjust = -0.5) +
+    geom_text(aes(x = Inf, y = sum_ranks$value[2], label = sum_ranks$rank[2]),
+              hjust = 1.4, color = RG_colours[2], vjust = 1.5) +
+    geom_text(aes(x = Inf, y = sum_ranks$value[3], label = sum_ranks$rank[3]),
+              hjust = 1.5, color = RG_colours[3], vjust = 1.5) +
+      geom_text(aes(x = Inf, y = sum_ranks$value[4], label = sum_ranks$rank[4]),
+              hjust = 1.7, color = RG_colours[4], vjust = 1.5) +
+      geom_text(aes(x = Inf, y = sum_ranks$value[5], label = sum_ranks$rank[5]),
+              hjust = 1.3, color = RG_colours[5], vjust = 1.5) +
+  labs(title = "Reptitive tasks and manual QA checks are recurring issues",
+       subtitle = "Bar chart showing the average rank (using a bipolar Likert scale) of the survey\nquestions relating to needs for RAP.",
+       x = "Survey questions",
+       y = "Average of Likert ranked survey questions") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 5)
+  )
+
+
+
+```
+
+
+
+
+```{r}
+
+
+# Convert to bi-polar likert scale
+division_data_numerical <- rank_to_num(df = division_data,
+                                       ranked_columns = ranked_columns,
+                                       likert_scale_dictionary = likert_scale_dictionary,
+                                       numerical_ranking_factors = numerical_ranking_factors)
+
+# Convert num survey qs to long (flip levels of +ve qs)
+div_data_num_long <- division_data_numerical |>
+  select("ID", all_of(ranked_columns)) |>
+  mutate(someone_else_could_run = 
+           factor(4 - as.numeric(levels(someone_else_could_run))[someone_else_could_run],
+                     levels = likert_scale_dictionary)
+         )|> 
+  tidyr::pivot_longer(cols = all_of(ranked_columns),
+                      names_to = "rank_q",
+                      values_to = "rank")
+
+needs_cols <- c("repetitive_tasks", "figuring_out_existing_processes_time_consuming",
+                "someone_else_could_run", "re-run_old_versions", "QA_manual_checks")
+
+# Df of total for each rank
+values <- num_rg_resp * 0:4
+sum_ranks <- data.frame(rank = ranking_factors, value = values)
+
+
+# Bar chart
+div_data_num_long |> 
+  filter(rank_q %in% needs_cols) |> 
+  summarise(total_rank = sum(as.numeric(levels(rank))[rank]),
+            .by = c("rank_q")) |> 
+  arrange(desc(total_rank)) |> 
+  mutate(rank_q = factor(rank_q, levels = rank_q)) |> 
+  ggplot(aes(x = rank_q, y = total_rank)) +
+  geom_col(fill = af_blue, colour = af_blue) +
+  lapply(1:nrow(sum_ranks), function(i) {
+    geom_hline(aes(yintercept = sum_ranks$value[i]), color = RG_colours[i], linetype = "dashed")
+  }) +
+  geom_text(aes(x = Inf, y = sum_ranks$value[1], label = sum_ranks$rank[1]),
+              hjust = 1.2, color = RG_colours[1], vjust = 1.5) +
+    geom_text(aes(x = Inf, y = sum_ranks$value[2], label = sum_ranks$rank[2]),
+              hjust = 1.4, color = RG_colours[2], vjust = 1.5) +
+    geom_text(aes(x = Inf, y = sum_ranks$value[3], label = sum_ranks$rank[3]),
+              hjust = 1.5, color = RG_colours[3], vjust = 1.5) +
+      geom_text(aes(x = Inf, y = sum_ranks$value[4], label = sum_ranks$rank[4]),
+              hjust = 1.7, color = RG_colours[4], vjust = 1.5) +
+      geom_text(aes(x = Inf, y = sum_ranks$value[5], label = sum_ranks$rank[5]),
+              hjust = 1.3, color = RG_colours[5], vjust = 1.5) +
+  labs(title = "Reptitive tasks and manual QA checks are common issues",
+       subtitle = "Bar chart showing the sum of the ranked survery questions (using the Likert scale).",
+       x = "Survey questions",
+       y = "Sum of ranked survey questions",
+       caption = "The scale someone_else_could_run has been flipped to suit its +ve meaning.") +
+  theme(
+    axis.text.x = element_text(angle = 5)
+  )
+
+
+
+
+```
+
