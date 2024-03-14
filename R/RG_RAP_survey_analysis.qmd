@@ -65,7 +65,7 @@ There were `r num_rg_resp` responses, of which came from `r length(unique(divisi
 #| label: needs-bar
 #| echo: false
 
-# Convert to bi-polar likert scale
+# Convert to bi-polar Likert scale
 bi_division_data_numerical <- rank_to_num(df = division_data,
                                        ranked_columns = ranked_columns,
                                        likert_scale_dictionary = bi_likert_scale_dictionary,
@@ -131,7 +131,7 @@ div_data_num_long |>
 ```{r}
 
 
-# Convert to bi-polar likert scale
+# Convert to Likert scale
 division_data_numerical <- rank_to_num(df = division_data,
                                        ranked_columns = ranked_columns,
                                        likert_scale_dictionary = likert_scale_dictionary,
