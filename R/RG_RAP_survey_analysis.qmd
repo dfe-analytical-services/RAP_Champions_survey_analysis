@@ -29,12 +29,20 @@ library(waffle)
 source(here('R', 'helpers.R'))
 source(here('R', 'load_data.R'))
 source(here('R', 'visualisations.R'))
+source(here('R', 'transform.R'))
 
 # Subset results for RG
 choose_divisions <- c("Regions Group")
 
-division_data <- RAP_full %>%
+# All reponses
+division_data_full <- RAP_full %>%
   filter_for_divisions(choose_divisions)
+
+# Unique responses
+division_data <- RAP_full %>%
+  filter_for_divisions(choose_divisions) |>
+  filter(!duplicated(Email, fromLast = TRUE))
+  
 ```
 
 
@@ -47,7 +55,7 @@ Here we look at the Regions Group population.
 #| label: waffle-plot
 #| echo: false
 
-waffle_pop_plot(df_div = division_data,
+waffle_pop_plot(df_div = division_data_full,
                 df_all = RAP_full)
 
 num_rg_resp <- nrow(division_data)
@@ -61,9 +69,8 @@ There were `r num_rg_resp` responses, of which came from `r length(unique(divisi
 ## Most common needs
 
 Below is a bar chart of the survey questions which related to why people need RAP.
-The questions were a ranking from Strongly disagree to Neutral to Strongly agree.
-A bi-polar Likert scale is used.
-Disagreement is negative, Neutral is 0 and Agreement is positive.
+The answers to the questions were a ranking from Strongly disagree to Neutral to Strongly agree.
+A bi-polar Likert scale is used (Disagreement is negative, Neutral is 0 and Agreement is positive).
 
 
 ```{r}
@@ -82,27 +89,26 @@ org_cols <- division_data |>
   colnames()
 
 # Convert num survey qs to long
-div_data_num_long <- bi_division_data_numerical |>
-  select("ID", all_of(ranked_columns)) |>
-  tidyr::pivot_longer(cols = all_of(ranked_columns),
-                      names_to = "rank_q",
-                      values_to = "rank")
-
-needs_cols <- c("repetitive_tasks", "figuring_out_existing_processes_time_consuming",
+needs_qs <- c("repetitive_tasks", "figuring_out_existing_processes_time_consuming",
                 "someone_else_could_run", "re-run_old_versions", "QA_manual_checks")
 
+div_data_num_long <- rank_to_long(bi_division_data_numerical, 
+                                  cols_long = needs_qs)
+
+
+
 # Dataframe storing rank values
-sum_ranks <- data.frame(rank = ranking_factors, value = as.numeric(numerical_ranking_factors))
+sum_ranks <- data.frame(rank = ranking_factors, value = as.numeric(bi_numerical_ranking_factors))
 
 
 # Bar chart
 div_data_num_long |> 
-  filter(rank_q %in% needs_cols) |> 
-  summarise(total_rank = mean(as.numeric(levels(rank))[rank]),
-            .by = c("rank_q")) |> 
+  summarise(total_rank = mean(as.numeric_factor(responses)),
+            .by = c("questions")) |> 
   arrange(desc(total_rank)) |> 
-  mutate(rank_q = factor(rank_q, levels = rank_q)) |> 
-  ggplot(aes(x = rank_q, y = total_rank)) +
+  mutate(questions = unlist(column_names_dictionary[questions]),
+         questions = factor(questions, levels = questions)) |> 
+  ggplot(aes(x = questions, y = total_rank)) +
   geom_col(fill = af_blue, colour = af_blue) +
   lapply(1:nrow(sum_ranks), function(i) {
     geom_hline(aes(yintercept = sum_ranks$value[i]), color = RG_colours[i], linetype = "dashed")
@@ -121,13 +127,105 @@ div_data_num_long |>
        subtitle = "Bar chart showing the average rank (using a bipolar Likert scale) of the survey\nquestions relating to needs for RAP.",
        x = "Survey questions",
        y = "Average of Likert ranked survey questions") +
+  scale_x_discrete(labels = insert_line_breaks) +
   theme_minimal() +
   theme(
-    axis.text.x = element_text(angle = 5)
+    axis.text.x = element_text(angle = 0)
   )
 
 
 
 ```
 
+It should be noted that someone_else_could_run is a positively framed question.
+So, disagreement infers a need to address the issue.
 
+
+Now, we look at how many people use code.
+
+
+
+```{r}
+#| label: who-codes
+
+# RAG bar chart for question I_use_code
+division_data |>
+  select(ID, I_use_code, comfortable_with_code) |>
+  rank_to_long(cols_long = "I_use_code") |> 
+  ggplot(aes(x = responses, fill = responses)) +
+  geom_bar(colour = "black") +
+  scale_fill_manual(values = likert_colours) +
+  labs(
+    title = "Most people use code, but there is room for more",
+    subtitle = paste0("Bar chart showing count of people who responded to the",
+                      ' question\n"I regularly perform analysis using code"',
+                      " grouped by response."),
+    x = "",
+    y = "Count",
+    fill = "Responses"
+  ) +
+  # facet_wrap(~ question) +
+  theme_minimal()
+
+```
+
+
+The data is subset to include only those people who agreed with the 
+"I regularly perform analysis using code" statement.
+This is done to analyse the code-related questions.
+
+
+
+```{r}
+#| label: code-comfortability
+
+code_qs <- c("comfortable_with_code", "open_source_tools", 
+            "know_how_to_open_source", "version_control_confusing")
+
+# Multi-panel plot of bar charts to show how coders rank code qs
+division_data |> 
+  filter(I_use_code %in% c("Strongly agree", "Agree")) |> 
+  rank_to_long(cols_long = code_qs) |> 
+  mutate(questions = unlist(column_names_dictionary[questions])) |> 
+  ggplot(aes(x = responses, fill = responses)) +
+  geom_bar(colour = "black") +
+  scale_fill_manual(values = likert_colours) +
+  labs(
+    title = "Coders are less certain on Version control and open-sourcing",
+    subtitle = paste0("Bar charts showing count of people who reponded to the",
+                      " code related questionsgrouped by response."),
+    x = "",
+    y = "Count",
+    fill = "Responses"
+  ) +
+  facet_wrap(~ questions) +
+  theme_minimal()
+
+```
+
+
+
+```{r}
+
+# # Lollipop plot to visualise how coders compare to non coders on RAP
+#   mutate(across(all_of(ranked_columns), ~as.numeric_factor(.))) |> 
+#   summarise(avg_rank = mean(responses), .by="questions") |> 
+#   ggplot(aes(x = questions, y = avg_rank)) +
+#   geom_point() +
+#   geom_segment(aes(x=questions, xend=questions,
+#                    y=0, yend=avg_rank ))
+```
+
+
+
+
+
+
+
+
+
+## Caveats
+
+There are duplicate answers (where someone has filled out the survey twice).
+
+Includes managers who are not necessarily involved in the day-to-day coding. 
