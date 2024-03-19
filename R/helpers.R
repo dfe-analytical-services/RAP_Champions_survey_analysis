@@ -84,11 +84,11 @@ as.numeric_factor <- function(fct) {
 
 
 # Insert line breaks every 6 words (for plotting labels)
-insert_line_breaks <- function(x) {
+insert_line_breaks <- function(x, freq=5) {
   sapply(strsplit(as.character(x), " "), function(x) {
     words <- unlist(strsplit(x, " "))
     words_with_breaks <- sapply(seq_along(words), function(i) {
-      if (i %% 5 == 0) {
+      if (i %% freq == 0) {
         return(paste(words[i], "\n"))
       } else {
         return(words[i])

@@ -26,6 +26,8 @@ library(ggplot2)
 library(afcolours)
 library(glue)
 library(waffle)
+library(tidytext)
+library(wordcloud2)
 source(here('R', 'helpers.R'))
 source(here('R', 'load_data.R'))
 source(here('R', 'visualisations.R'))
@@ -35,11 +37,11 @@ source(here('R', 'transform.R'))
 choose_divisions <- c("Regions Group")
 
 # All reponses
-division_data_full <- RAP_full %>%
+division_data_full <- RAP_full |>
   filter_for_divisions(choose_divisions)
 
 # Unique responses
-division_data <- RAP_full %>%
+division_data <- RAP_full |>
   filter_for_divisions(choose_divisions) |>
   filter(!duplicated(Email, fromLast = TRUE))
   
@@ -58,7 +60,7 @@ Here we look at the Regions Group population.
 waffle_pop_plot(df_div = division_data_full,
                 df_all = RAP_full)
 
-num_rg_resp <- nrow(division_data)
+num_rg_resp <- nrow(division_data_full)
 
 ```
 
@@ -83,6 +85,11 @@ bi_division_data_numerical <- rank_to_num(df = division_data,
                                        likert_scale_dictionary = bi_likert_scale_dictionary,
                                        numerical_ranking_factors = bi_numerical_ranking_factors)
 
+# Create long version of numerical data
+div_data_num_long <- rank_to_long(bi_division_data_numerical, 
+                                  cols_long = ranked_columns)
+
+
 # Organisation cols
 org_cols <- division_data |> 
   select(1:which(names(division_data)=="Group")) |> 
@@ -92,10 +99,6 @@ org_cols <- division_data |>
 needs_qs <- c("repetitive_tasks", "figuring_out_existing_processes_time_consuming",
                 "someone_else_could_run", "re-run_old_versions", "QA_manual_checks")
 
-div_data_num_long <- rank_to_long(bi_division_data_numerical, 
-                                  cols_long = needs_qs)
-
-
 
 # Dataframe storing rank values
 sum_ranks <- data.frame(rank = ranking_factors, value = as.numeric(bi_numerical_ranking_factors))
@@ -103,6 +106,7 @@ sum_ranks <- data.frame(rank = ranking_factors, value = as.numeric(bi_numerical_
 
 # Bar chart
 div_data_num_long |> 
+  filter(questions %in% needs_qs) |> 
   summarise(total_rank = mean(as.numeric_factor(responses)),
             .by = c("questions")) |> 
   arrange(desc(total_rank)) |> 
@@ -150,21 +154,25 @@ Now, we look at how many people use code.
 
 # RAG bar chart for question I_use_code
 division_data |>
-  select(ID, I_use_code, comfortable_with_code) |>
-  rank_to_long(cols_long = "I_use_code") |> 
+  select(ID, line_manager, I_use_code, comfortable_with_code) |>
+  rank_to_long(cols_long = "I_use_code", line_manager) |> 
   ggplot(aes(x = responses, fill = responses)) +
   geom_bar(colour = "black") +
-  scale_fill_manual(values = likert_colours) +
+  scale_fill_manual(values = likert_colours, drop=FALSE) +
+  scale_x_discrete(drop=FALSE) +
   labs(
     title = "Most people use code, but there is room for more",
     subtitle = paste0("Bar chart showing count of people who responded to the",
-                      ' question\n"I regularly perform analysis using code"',
+                      ' question "I regularly perform analysis using code"',
                       " grouped by response."),
     x = "",
     y = "Count",
     fill = "Responses"
   ) +
-  # facet_wrap(~ question) +
+  facet_wrap(~ factor(line_manager,
+                      levels = c(FALSE, TRUE),
+                      labels = c("Non-line manager", "Line manager")),
+             dir = "v") +
   theme_minimal()
 
 ```
@@ -191,31 +199,181 @@ division_data |>
   geom_bar(colour = "black") +
   scale_fill_manual(values = likert_colours) +
   labs(
-    title = "Coders are less certain on Version control and open-sourcing",
-    subtitle = paste0("Bar charts showing count of people who reponded to the",
-                      " code related questionsgrouped by response."),
+    title = "Coders are less comfortable with version control and open-sourcing",
+    subtitle = paste0("Bar charts showing count of coders* who reponded to the",
+                      " code related questions grouped by response."),
+    caption = paste0("*coders means only those who agreed with the statement",
+                     ' "I regularly perform analysis using code" are included.'),
     x = "",
     y = "Count",
     fill = "Responses"
   ) +
-  facet_wrap(~ questions) +
+  facet_wrap(~ factor(questions, unlist(column_names_dictionary[code_qs]))) +
   theme_minimal()
 
 ```
 
 
+## RAP specific
+
+A lollipop plot displays the respondent's feelings towards RAP.
+The Bi-polar Likert rank scale is used again and the average is calculated.
+Three vertical lines are drawn on the plot to show where qualitative ranks lie 
+relative to the numerical scale. 
+
+
 
 ```{r}
+#| label: RAP
 
-# # Lollipop plot to visualise how coders compare to non coders on RAP
-#   mutate(across(all_of(ranked_columns), ~as.numeric_factor(.))) |> 
-#   summarise(avg_rank = mean(responses), .by="questions") |> 
-#   ggplot(aes(x = questions, y = avg_rank)) +
-#   geom_point() +
-#   geom_segment(aes(x=questions, xend=questions,
-#                    y=0, yend=avg_rank ))
+rap_qs <- original_names[19:26]
+
+# Lollipop plot to visualise how coders compare to non coders on RAP
+div_data_num_long |> 
+  mutate(responses = as.numeric_factor(responses),
+         questions = unlist(column_names_dictionary[questions])) |>
+  filter(questions %in% rap_qs) |> 
+  summarise(avg_rank = mean(responses, na.rm = T), .by="questions") |>
+  ggplot(aes(x = reorder(questions, desc(avg_rank)), y = avg_rank)) +
+  geom_point() +
+  geom_segment(aes(x=questions, xend=questions,
+                   y=0, yend=avg_rank )) +
+  geom_hline(yintercept = bi_likert_scale_dictionary[c("Agree", "Neutral", "Disagree")],
+             color = RG_colours[c(4, 3, 2)], linetype = "dashed") +
+  lapply(c("Agree", "Neutral", "Disagree"), function(resp) {
+    geom_text(aes(label = resp, y = bi_likert_scale_dictionary[resp], x=Inf), 
+              color = RG_colours[match(resp, c("Disagree", "Neutral", "Agree"))+1], vjust=4)
+  }) +
+  scale_y_continuous(limits = c(-1,1)) +
+  scale_x_discrete(labels = insert_line_breaks) +
+  coord_flip() +
+  labs(
+    title = "RAP is regarded as useful, but there lacks the confidence/expertise to implement it",
+    subtitle = paste0("Lolliplot showing the average scores for RAP related",
+                      " questions using a bi-polar Likert ranking scale."),
+    x = "",
+    y = "Average score (bi-polar Likert ranking)"
+  ) +  
+  theme_minimal()
 ```
 
+
+
+## Line manager specific
+
+Here we investigate how line managers specifically responded about RAP.
+A lollipop plot is used again to summarise the average response rankings to the questions.
+
+
+```{r}
+#| label: line-managers
+
+lm_qs <- original_names[25:42]
+
+# Lollipop plot to visualise how coders compare to non coders on RAP
+bi_division_data_numerical |> 
+  rank_to_long(cols_long = ranked_columns, "line_manager") |> 
+  mutate(responses = as.numeric_factor(responses),
+         questions = unlist(column_names_dictionary[questions])) |>
+  filter(line_manager == TRUE,
+         questions %in% lm_qs) |> 
+  summarise(avg_rank = mean(responses, na.rm = T), .by="questions") |>
+  ggplot(aes(x = reorder(questions, desc(avg_rank)), y = avg_rank)) +
+  geom_point() +
+  geom_segment(aes(x=questions, xend=questions,
+                   y=0, yend=avg_rank )) +
+  geom_hline(yintercept = rev(bi_likert_scale_dictionary),
+             color = RG_colours, linetype = "dashed") +
+  
+  lapply(ranking_factors, function(resp) {
+             
+    geom_text(aes(label = insert_line_breaks(resp, freq = 1),
+                  y = bi_likert_scale_dictionary[resp], x=Inf), 
+              color = RG_colours[match(resp, ranking_factors)],
+              vjust=1.5)
+             }
+    ) +
+  scale_y_continuous(limits = c(-2,2)) +
+  scale_x_discrete(labels = insert_line_breaks) +
+  coord_flip() +
+  labs(
+    title = paste0("Line managers are confident in their team to implement RAP, but ",
+                   "are unsure about RAP themselves"),
+    subtitle = paste0("Lolliplot showing the average scores for line manager RAP related",
+                      " questions using a bi-polar Likert ranking scale."),
+    x = "",
+    y = "Average score (bi-polar Likert ranking)"
+  ) +  
+  theme_minimal()
+```
+
+
+
+
+## Qualitiative data
+
+There are 5 applicable qualitative questions in the survey.
+For Regions Group only 3 are suitable for analysis.
+The other two have very low response rates and are summarised below:
+
+- "If you would like to, please share who you currently go to for help with issues and questions on RAP"
+  - DfE RAP channel (one response)
+  
+- "If you are nervous about your team implementing RAP, please explain why below:"
+  - "I'm nervous about the assumption that they will be implementing it"
+
+
+
+```{r}
+#| label: word-freq
+
+# Word freq plots (cleaned for stop words)
+clean_word_col(division_data, "factors_limiting_reproducibility") |> 
+  word_frequency(10) +
+  labs(title = "Time is the biggest factor preventing people RAP",
+       subtitle = paste0('Word frequency plot for survey question - "What do ',
+                         'you think are the biggest factors that limit how ',
+                         'easy your analytical process is to\nreproduce, ',
+                         'understand, or quality assure?"'),
+       caption = "Stop words have been removed") +
+  theme_minimal()
+
+```
+
+
+Word cloud for question:
+
+**What support would you need to improve your current analytical processes or** 
+**convert current analysis to RAP?**
+
+```{r}
+#| label: word_cloud-support
+
+# Word cloud
+wordcloud2(data = clean_word_col(division_data, "support_needed"),
+           shape = "circle", size = 0.7, ellipticity = 0.8,
+           rotateRatio = 0)
+
+```
+
+
+<br>
+
+Word cloud for question:
+
+**What projects do you work on that you feel would benefit most from automation** 
+**and RAP processes?**
+
+```{r}
+#| label: word_cloud-proj_rap
+
+
+# Word cloud
+wordcloud2(data = clean_word_col(division_data, "projects_benefit_from_RAP"),
+           shape = "circle", size = 0.7, ellipticity = 0.8,
+           rotateRatio = 0)
+
+```
 
 
 
@@ -226,6 +384,21 @@ division_data |>
 
 ## Caveats
 
-There are duplicate answers (where someone has filled out the survey twice).
+*Duplicates*
 
-Includes managers who are not necessarily involved in the day-to-day coding. 
+There are duplicate answers (where someone has filled out the survey twice).
+Instead of keeping them, we remove any duplicated answers after the person's first response.
+This was done to avoid inflation of responses.
+
+
+*Line managers*
+
+The data includes managers who are not necessarily involved in day-to-day coding.
+We attempt to control for this by separating them out for the "Who codes?" analysis.
+The responses to questions relating to coding are kept only for those people who 
+agreed with the question "I regularly perform analysis using code".
+
+
+*Missing population*
+
+There are several analysts who did not complete the survey 

@@ -107,3 +107,18 @@ waffle_pop_plot <- function(df_div,
                            " in columns of 8")) +
     theme(legend.position = "bottom")
 }
+
+
+
+# Create a word frequency plot
+word_frequency <- function(x, top = 10){
+
+  x |>
+    slice_head(n=top) |>
+    ggplot(mapping = aes(x = word, y = freq)) +
+    geom_col(show.legend = FALSE, fill = af_blue) +
+    coord_flip() +
+    labs(x = NULL,
+         y = "Frequency") +
+    theme_minimal()
+}
