@@ -18,7 +18,8 @@ clean_word_col <- function(df, word_col) {
     select(all_of(word_col)) |>
     unnest_tokens("Word", word_col) |>
     anti_join(stop_words, by = c("Word" = "word")) |> # anti_join just keeps the rows common to both data sets
-    mutate(word = stringr::str_replace(Word, "'s", "")) |>
+    mutate(word = stringr::str_replace(Word, "'s", ""),
+           word = stringr::str_replace(Word, "ing", "")) |>
     count(word, sort = TRUE, name = "freq") |>
     # Most frequent words as top level
     mutate(word = factor(word, levels = rev(unique(word)))) |>
