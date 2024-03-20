@@ -2,6 +2,7 @@
 # ---- Packages ----
 
 library(dplyr)
+library(tidyr)
 library(here)
 library(afcolours)
 
@@ -76,13 +77,27 @@ RAP_full <- RAP_full %>%
 
 # we have to turn the values into numerical data for some things -- I have just
 # used a five point scale from 0 - 4, strongly disagree - strongly agree.
-RAP_full_numerical <- RAP_full %>%
-  rowwise() %>%
-  mutate(across(all_of(ranked_columns), ~likert_scale_dictionary[as.character(.)])) %>%
-  ungroup()
+rank_to_num <- function(df,
+                        ranked_columns,
+                        likert_scale_dictionary,
+                        numerical_ranking_factors
+                        ) {
+  df_num <- df %>%
+    rowwise() %>%
+    mutate(across(all_of(ranked_columns), ~likert_scale_dictionary[as.character(.)])) %>%
+    ungroup()
 
-# make columns factors
-RAP_full_numerical[ranked_columns] <- lapply(RAP_full_numerical[ranked_columns],
-                                                  factor,
-                                                  levels = numerical_ranking_factors)
+  df_num[ranked_columns] <- lapply(df_num[ranked_columns],
+                                               factor,
+                                               levels = numerical_ranking_factors)
+
+  return(df_num)
+
+}
+
+
+RAP_full_numerical <- rank_to_num(df = RAP_full,
+                                  ranked_columns = ranked_columns,
+                                  likert_scale_dictionary = likert_scale_dictionary,
+                                  numerical_ranking_factors = numerical_ranking_factors)
 

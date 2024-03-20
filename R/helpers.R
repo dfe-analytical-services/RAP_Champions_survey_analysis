@@ -76,3 +76,25 @@ get_correlation <- function(df, col1, col2){
 
 }
 
+
+# Convert factors to numeric (their physical value not level)
+as.numeric_factor <- function(fct) {
+  as.numeric(levels(fct))[fct]
+}
+
+
+# Insert line breaks every 6 words (for plotting labels)
+insert_line_breaks <- function(x, freq=5) {
+  sapply(strsplit(as.character(x), " "), function(x) {
+    words <- unlist(strsplit(x, " "))
+    words_with_breaks <- sapply(seq_along(words), function(i) {
+      if (i %% freq == 0) {
+        return(paste(words[i], "\n"))
+      } else {
+        return(words[i])
+      }
+    })
+    paste(words_with_breaks, collapse = " ")
+  })
+}
+
