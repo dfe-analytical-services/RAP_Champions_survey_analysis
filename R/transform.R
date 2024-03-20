@@ -1,5 +1,5 @@
 
-
+# Convert numerical columns to long format
 rank_to_long <- function(df_num, cols_long=ranked_columns, ...) {
   df_num |>
     select("ID", ..., all_of(cols_long)) |>
