@@ -308,6 +308,59 @@ div_data_num_long |>
 
 <br>
 
+```{r}
+#| label: RAP-split
+#| column: page
+#| out-width: 90%
+#| fig-align: center
+
+rap_qs_full <- names(column_names_dictionary)[which(sapply(column_names_dictionary, 
+                                                           function(x) x %in% rap_qs))]
+
+div_rap_data_num_long <- rank_to_long(bi_division_data_numerical, 
+                                  cols_long = rap_qs_full,
+                                  "I_use_code") |> 
+  mutate(I_use_code = as.numeric_factor(I_use_code),
+         I_use_code = case_when(I_use_code > 0 ~ "Coder",
+                                TRUE ~ "Non-coder"))
+
+# Lollipop plot to visualise how coders compare to non coders on RAP
+div_rap_data_num_long |> 
+  mutate(responses = as.numeric_factor(responses),
+         questions = unlist(column_names_dictionary[questions])) |>
+  filter(questions %in% rap_qs) |> 
+  summarise(avg_rank = mean(responses, na.rm = T), .by=c("I_use_code", "questions")) |>
+  pivot_wider(id_cols = questions, names_from = I_use_code, values_from = avg_rank) |> 
+  rowwise() %>% 
+  mutate(mymean = mean(c(Coder,`Non-coder`) )) |> 
+  arrange(mymean) |> 
+  mutate(questions=factor(questions, questions)) |> 
+  ggplot() +
+  geom_segment(aes(x=questions, xend=questions,
+                   y=Coder, yend=`Non-coder`), color="grey") +
+  geom_point(aes(x=questions, y=Coder), color=rgb(0.2,0.7,0.1,0.5), size=3 ) +
+  geom_point(aes(x=questions, y=`Non-coder`), color=rgb(0.7,0.2,0.1,0.5), size=3 ) +
+  geom_hline(yintercept = bi_likert_scale_dictionary[c("Agree", "Neutral", "Disagree")],
+             color = RG_colours[c(4, 3, 2)], linetype = "dashed") +
+  lapply(c("Agree", "Neutral", "Disagree"), function(resp) {
+    geom_text(aes(label = resp, y = bi_likert_scale_dictionary[resp], x=Inf), 
+              color = RG_colours[match(resp, c("Disagree", "Neutral", "Agree"))+1], vjust=1)
+  }) +
+  scale_y_continuous(limits = c(-1.2,1)) +
+  scale_x_discrete(labels = insert_line_breaks) +
+  coord_flip() +
+  labs(
+    title = "RAP is regarded as useful, but there lacks the\nconfidence/expertise to implement it",
+    subtitle = paste0("Lolliplot showing the average scores for RAP related",
+                      " questions\nusing a bi-polar Likert ranking scale.\n"),
+    x = "",
+    y = "Average score (bi-polar Likert ranking)"
+  ) +  
+  theme_minimal()
+```
+
+<br>
+
 ## Line manager specific
 
 Here we investigate how line managers specifically responded about RAP.
@@ -338,7 +391,6 @@ bi_division_data_numerical |>
                    y=0, yend=avg_rank )) +
   geom_hline(yintercept = rev(bi_likert_scale_dictionary),
              color = RG_colours, linetype = "dashed") +
-  
   lapply(ranking_factors, function(resp) {
              
     geom_text(aes(label = insert_line_breaks(resp, freq = 1),
@@ -470,6 +522,41 @@ Key points from visual analysis:
 - Standard documents and updating statistical records 
 - Monthly/Annual data output
 - QA
+
+
+## Comparing division results
+
+```{r}
+#| label: compare-divisions-wip
+#| include: false
+
+library(ggradar)
+
+bi_rap_full <- rank_to_num(
+  df = RAP_full,
+  ranked_columns = ranked_columns,
+  likert_scale_dictionary = bi_likert_scale_dictionary,
+  numerical_ranking_factors = bi_numerical_ranking_factors
+)
+
+bi_rap_full |> 
+  select(division, all_of(needs_qs)) |> 
+  mutate(across(all_of(needs_qs), ~as.numeric_factor(.))) |> 
+  summarise(across(all_of(needs_qs), list(avg = mean), .names = "avg_{.col}"),
+            .by = "division") |> 
+  filter(grepl(paste("Regions Group", collapse = "|"), division)) |> 
+  ggradar(
+    grid.label.size = 13,  # Affects the grid annotations (0%, 50%, etc.)
+    axis.label.size = 8.5, # Afftects the names of the variables
+    group.point.size = 3,   # Simply the size of the point 
+    grid.min = -2,
+    grid.max = 2
+  )
+
+  
+```
+
+
 
 
 

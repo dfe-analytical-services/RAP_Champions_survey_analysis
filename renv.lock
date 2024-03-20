@@ -545,6 +545,22 @@
       ],
       "Hash": "313d31eff2274ecf4c1d3581db7241f9"
     },
+    "ggradar": {
+      "Package": "ggradar",
+      "Version": "0.2",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "ggradar",
+      "RemoteUsername": "ricardo-bion",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "f99517ae4df2903d3dbd4116af91b24009a5ac93",
+      "Requirements": [
+        "forcats",
+        "ggplot2"
+      ],
+      "Hash": "5c884fdb98bed4d1b765c9debc92ac9e"
+    },
     "gld": {
       "Package": "gld",
       "Version": "2.6.6",
