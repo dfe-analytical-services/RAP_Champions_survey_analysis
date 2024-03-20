@@ -549,7 +549,11 @@ agreed with the question "I regularly perform analysis using code".
 
 ***Missing population***
 
-There are several analysts who did not complete the survey 
+Although we captured over half of the population a sizable proportion of people were missed.
+There are several analysts who did not complete the survey (at least 9).
+Line managers are also missing (at least 2).
+The results therefore do not reflect the whole unit and it would be interesting to see if the findings would differ if we managed to capture more respondents.
+
 
 
 
