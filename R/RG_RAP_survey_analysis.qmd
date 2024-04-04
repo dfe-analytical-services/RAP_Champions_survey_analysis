@@ -547,6 +547,7 @@ Key points from visual analysis:
 #| column: page
 #| out-width: 90%
 #| fig-align: center
+#| include: false
 
 # Word cloud
 wordcloud2(data = clean_word_col(division_data, "support_needed"),
@@ -555,7 +556,8 @@ wordcloud2(data = clean_word_col(division_data, "support_needed"),
 
 ```
 
-<br>
+![](../figures/convert_to_rap.png){width=1000 height=600 fig-align="left"}
+
 
 Key points from visual analysis:
 
@@ -577,6 +579,7 @@ Key points from visual analysis:
 #| column: page
 #| out-width: 90%
 #| fig-align: center
+#| include: false
 
 # Word cloud
 wordcloud2(data = clean_word_col(division_data, "projects_benefit_from_RAP"),
@@ -585,7 +588,8 @@ wordcloud2(data = clean_word_col(division_data, "projects_benefit_from_RAP"),
 
 ```
 
-<br>
+![](../figures/projects_for_rap.png){width=1000 height=600 fig-align="left"}
+
 
 Key points from visual analysis:
 
