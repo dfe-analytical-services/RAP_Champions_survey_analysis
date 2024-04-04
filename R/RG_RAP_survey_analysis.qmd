@@ -9,7 +9,8 @@ format:
 
 ## Introduction
 
-This Quarto document analyses the 2023 (early 2024) RAP Survey results for the Regions Group division. The areas focused on are:
+This Quarto document analyses the 2023 (early 2024) RAP Survey results for the Regions Group division.
+The areas focused on are:
 
 - Most common/important needs in your area
 - Biggest problems for people in your area when attempting RAP
@@ -63,7 +64,10 @@ Here we look at the Regions Group population.
 #| fig-align: center
 
 waffle_pop_plot(df_div = division_data_full,
-                df_all = RAP_full)
+                df_all = RAP_full) +
+  theme(
+    plot.subtitle=element_text(size=9)
+  )
 
 num_rg_resp <- nrow(division_data_full)
 
@@ -136,14 +140,15 @@ div_data_num_long |>
               hjust = 1.7, color = RG_colours[4], vjust = 1.5) +
       geom_text(aes(x = Inf, y = sum_ranks$value[5], label = sum_ranks$rank[5]),
               hjust = 1.3, color = RG_colours[5], vjust = 1.5) +
-  labs(title = "Reptitive tasks and manual QA checks are recurring issues",
+  labs(title = "Reptitive tasks and manual QA checks are recurring issues\n",
        subtitle = "Bar chart showing the average rank (using a bipolar Likert scale) of the survey\nquestions relating to needs for RAP.",
        x = "Survey questions",
        y = "Average of Likert ranked survey questions") +
   scale_x_discrete(labels = function(x) insert_line_breaks(x, freq = 4)) +
   theme_minimal() +
   theme(
-    axis.text.x = element_text(size = 6.3)
+    axis.text.x = element_text(size = 6.5),
+    plot.subtitle=element_text(size=9)
   )
 
 
@@ -186,7 +191,7 @@ division_data |>
   scale_x_discrete(drop=FALSE, 
                    labels = function(x) insert_line_breaks(x, freq = 1)) +
   labs(
-    title = "Most people use code, but there is room for more",
+    title = "Most people use code, but there is room for more\n",
     subtitle = paste0("Bar chart showing count of people who responded to the",
                       ' question "I regularly\nperform analysis using code"',
                       " grouped by response.\n"),
@@ -198,7 +203,10 @@ division_data |>
                       levels = c(FALSE, TRUE),
                       labels = c("Non-line manager", "Line manager")),
              dir = "v") +
-  theme_minimal()
+  theme_minimal() +
+  theme(
+    plot.subtitle=element_text(size=9)
+  )
 
 ```
 
@@ -207,7 +215,7 @@ division_data |>
 The responses are relatively polarised, with no neutral responses.
 The majority of respondents agreed they use code but a fairly high number 
 disagree.
-In line with RAP a goal should be to try and up-skill the non-coders.
+In line with RAP a goal should be to try and upskill the non-coders.
 
 
 ---
@@ -239,7 +247,7 @@ division_data |>
   scale_fill_manual(values = likert_colours) +
   scale_x_discrete(labels = function(x) insert_line_breaks(x, freq = 1)) +
   labs(
-    title = "Coders are less comfortable with version control and open-sourcing",
+    title = "Coders are less comfortable with version control and open-sourcing\n",
     subtitle = paste0("Bar charts showing count of coders* who reponded to the",
                       " code related questions\ngrouped by response.\n"),
     caption = paste0("*coders means only those who agreed with the following statement\n",
@@ -251,7 +259,8 @@ division_data |>
   facet_wrap(~ factor(questions, insert_line_breaks(unlist(column_names_dictionary[code_qs])))) +
   theme_minimal() +
   theme(
-    axis.text.x = element_text(size = 7)
+    axis.text.x = element_text(size = 7),
+    plot.subtitle=element_text(size=9)
   )
 
 ```
@@ -297,16 +306,30 @@ div_data_num_long |>
   scale_x_discrete(labels = insert_line_breaks) +
   coord_flip() +
   labs(
-    title = "RAP is regarded as useful, but there lacks the\nconfidence/expertise to implement it",
+    title = "RAP is regarded as useful, but there lacks the\nconfidence/expertise to implement it\n",
     subtitle = paste0("Lolliplot showing the average scores for RAP related",
                       " questions\nusing a bi-polar Likert ranking scale.\n"),
     x = "",
     y = "Average score (bi-polar Likert ranking)"
   ) +  
-  theme_minimal()
+  theme_minimal()+
+  theme(
+    plot.subtitle=element_text(size=9),
+    axis.text.y = element_text(size = 6.5),
+  )
 ```
 
 <br>
+
+---
+
+<br>
+
+The same data is shown but split by "Coders" and "Non-coders".
+This is to compare how the different groups feel towards RAP and if
+there are certain aspects that should be focused on specifically for each.
+
+---
 
 ```{r}
 #| label: RAP-split
@@ -338,8 +361,10 @@ div_rap_data_num_long |>
   ggplot() +
   geom_segment(aes(x=questions, xend=questions,
                    y=Coder, yend=`Non-coder`), color="grey") +
-  geom_point(aes(x=questions, y=Coder), color=rgb(0.2,0.7,0.1,0.5), size=3 ) +
-  geom_point(aes(x=questions, y=`Non-coder`), color=rgb(0.7,0.2,0.1,0.5), size=3 ) +
+  geom_point(aes(x=questions, y=Coder, color="Coder"),
+             size=3 ) +
+  geom_point(aes(x=questions, y=`Non-coder`, color="Non-coder"),
+             size=3 ) +
   geom_hline(yintercept = bi_likert_scale_dictionary[c("Agree", "Neutral", "Disagree")],
              color = RG_colours[c(4, 3, 2)], linetype = "dashed") +
   lapply(c("Agree", "Neutral", "Disagree"), function(resp) {
@@ -349,14 +374,25 @@ div_rap_data_num_long |>
   scale_y_continuous(limits = c(-1.2,1)) +
   scale_x_discrete(labels = insert_line_breaks) +
   coord_flip() +
+  scale_color_manual(
+    values = c("Coder" = af_colours(type = "duo")[1],
+               "Non-coder" = af_colours(type = "duo")[2]),
+    name = "") +
   labs(
-    title = "RAP is regarded as useful, but there lacks the\nconfidence/expertise to implement it",
+    title = paste0("Coders and non-coders feel similar towards RAP, but\n",
+                   "non-coders worry about their ability to implement it\n"),
     subtitle = paste0("Lolliplot showing the average scores for RAP related",
-                      " questions\nusing a bi-polar Likert ranking scale.\n"),
+                      " questions\nusing a bi-polar Likert ranking scale, ",
+                      "split by coders and non-coders.\n"),
     x = "",
     y = "Average score (bi-polar Likert ranking)"
   ) +  
-  theme_minimal()
+  theme_minimal() +
+  theme(
+    plot.subtitle = element_text(size = 9),
+    axis.text.y = element_text(size = 6.5),
+    legend.position = "bottom"
+  ) 
 ```
 
 <br>
@@ -404,7 +440,7 @@ bi_division_data_numerical |>
   coord_flip() +
   labs(
     title = paste0("Line managers are confident in their team to implement RAP, but\n",
-                   "are unsure about RAP themselves"),
+                   "are unsure about RAP themselves\n"),
     subtitle = paste0("Lolliplot showing the average scores for line manager RAP related",
                       "\nquestions using a bi-polar Likert ranking scale.\n"),
     x = "",
@@ -412,7 +448,8 @@ bi_division_data_numerical |>
   ) +  
   theme_minimal() +
   theme(
-    axis.text.y = element_text(size = 6.5)
+    axis.text.y = element_text(size = 6.5),
+    plot.subtitle = element_text(size = 9)
   )
 ```
 
@@ -442,13 +479,16 @@ The other two have very low response rates and are summarised below:
 # Word freq plots (cleaned for stop words)
 clean_word_col(division_data, "factors_limiting_reproducibility") |> 
   word_frequency(10) +
-  labs(title = "Time is the biggest factor preventing people RAP",
+  labs(title = "Time is the biggest factor preventing people RAP\n",
        subtitle = paste0('Word frequency plot for survey question - "What do ',
                          'you think are the biggest factors that limit how ',
-                         'easy your analytical process is to\nreproduce, ',
+                         'easy\nyour analytical process is to reproduce, ',
                          'understand, or quality assure?"\n'),
        caption = "Stop words have been removed") +
-  theme_minimal()
+  theme_minimal() +
+  theme(
+    plot.subtitle=element_text(size=9)
+  )
 
 ```
 
@@ -458,7 +498,7 @@ Key points from visual analysis:
 
 - Time and work pressures. 
 - Lack the skills and coding ability.
-- Ad-hoc jobs (I think this means too small a project to bother with RAP)
+- Ad hoc jobs (I think this means too small a project to bother with RAP)
 - Missing consistency and documentation.
 - Joining of multiple datasets.
 
@@ -467,7 +507,7 @@ Key points from visual analysis:
 
 <br>
 
-Word cloud for the question:
+**Word cloud for the question:**
 
 *What support would you need to improve your current analytical processes or*
 *convert current analysis to RAP?*
@@ -489,18 +529,18 @@ wordcloud2(data = clean_word_col(division_data, "support_needed"),
 
 Key points from visual analysis:
 
-- Proof of concept/exemplar projects
-- Time and space to implement RAP on projects (agree with customer)
-- Training (RAP, code)
+- Proof of concept/exemplar projects.
+- Time and space to implement RAP on projects (agree with customer).
+- Training (RAP, code).
 
 ---
 
 <br>
 
-Word cloud for question:
+**Word cloud for question:**
 
-**What projects do you work on that you feel would benefit most from automation** 
-**and RAP processes?**
+*What projects do you work on that you feel would benefit most from automation*
+*and RAP processes?*
 
 ```{r}
 #| label: word_cloud-proj_rap
@@ -519,9 +559,9 @@ wordcloud2(data = clean_word_col(division_data, "projects_benefit_from_RAP"),
 
 Key points from visual analysis:
 
-- Standard documents and updating statistical records 
-- Monthly/Annual data output
-- QA
+- Standard documents and updating statistical records.
+- Monthly/Annual data output.
+- QA.
 
 
 ## Comparing division results
@@ -568,9 +608,9 @@ RAP is required to minimise repetitive tasks.
 In particular in those workflows that are carried out at regular time intervals
 (e.g., monthly, quarterly).
 This should also help people when re-running old workflows (both their own and 
-other peoples).
+their colleagues).
 
-Our unit's QA steps would also benefit from RAP.
+Our unit's QA would also benefit from RAP.
 Currently a consistent and thorough QA process is missing.
 
 Documentation through RAP will be very important. 
@@ -584,12 +624,18 @@ analytical projects.
 
 The major issue is buy-in.
 For the analyst this is in time.
-For managers it stems from not understanding how RAP is implemented, thus not
-being able to provided the resources (including time) to the analysts.
+For managers it stems from not rally understanding how RAP is implemented, 
+thus not being able to provided the resources (including time) to the analysts.
 Customers should also factor in the requirement of RAP.
 
-Some analysts still need to be captured for the up-skilling of code.
-Understanding RAP should also be developed.
+Some analysts still need to be captured in the upskilling of code.
+There are introductions to [R courses ran by the leaders of RAP (Charlotte
+Foster and Jen Machin)]({{< env url_dfe_learning_support >}}){target="_blank"}. 
+Email 
+[statistics.development@education.gov.uk](mailto:statistics.development@education.gov.uk)
+for more information.
+
+The understanding of RAP also needs to be developed further.
 Small bite-size RAP-related knowledge shares will benefit confident coders.
 
 <br>
@@ -597,11 +643,11 @@ Small bite-size RAP-related knowledge shares will benefit confident coders.
 - **Ideas to support the people in your area with RAP**
 
 Further knowledge shares on RAP will be helpful.
-We have a medium set up for this currently (RDD Data Tools meeting), this should 
+We have a channel set up for this currently (RDD Data Tools meeting), this should 
 be utilised more formally.
 
-Managers should allow time for analysts to up skill in code (there are lots of 
-resources available for this - but which should be addressed).
+Managers should allow time for analysts to upskill in code (there are lots of 
+resources available for this - but which to use needs to be made clear).
 
 An agreed consistent and unit-wide approach to analytical projects should be 
 formalised:
@@ -622,24 +668,29 @@ formalised:
 ***Duplicates***
 
 There are duplicate answers (where someone has filled out the survey twice).
-Instead of keeping them, we remove any duplicated answers after the person's first response.
+Instead of keeping them, duplicated answers were removed after the person's 
+first response.
 This was done to avoid inflation of responses.
 
 
 ***Line managers***
 
-The data includes managers who are not necessarily involved in day-to-day coding.
-We attempt to control for this by separating them out for the "Who codes?" analysis.
-The responses to questions relating to coding are kept only for those people who 
-agreed with the question "I regularly perform analysis using code".
+The data includes managers who are not necessarily involved in day-to-day 
+coding.
+We attempt to control for this by separating them out for the "Who codes?" 
+analysis.
+The responses to questions relating to coding are kept only for those people 
+who agreed with the question "I regularly perform analysis using code".
 
 
 ***Missing population***
 
-Although we captured over half of the population a sizable proportion of people were missed.
+Although we captured over half of the population a sizable proportion of people 
+were missed.
 There are several analysts who did not complete the survey (at least 9).
 Line managers are also missing (at least 2).
-The results therefore do not reflect the whole unit and it would be interesting to see if the findings would differ if we managed to capture more respondents.
+The results therefore do not reflect the whole unit and it would be interesting 
+to see if the findings would differ if we managed to capture more respondents.
 
 
 
@@ -647,5 +698,7 @@ The results therefore do not reflect the whole unit and it would be interesting 
 ## To do
 
 1. Add radar chart comparing groups of questions across divisions
-2. Lollipop plot comparing RAP qs for coders/non-coders
-3. Caveat on number of analyst responses
+2. Apply new folder structure to project.
+3. Tidy up functions and test them.
+4. Put plots into a function.
+5. Use {targets}.

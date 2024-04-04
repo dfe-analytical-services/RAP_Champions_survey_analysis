@@ -102,7 +102,7 @@ waffle_pop_plot <- function(df_div,
                       values = af_colours(type = "focus", 'hex') |> suppressMessages()) +
     coord_equal() +
     theme_void() +
-    labs(title = glue("{division_nm} made up {rg_perc_respond}% of responses"),
+    labs(title = glue("{division_nm} made up {rg_perc_respond}% of responses\n"),
          subtitle = paste0("Waffle plot to show the number of responses to the RAP survery",
                            " in columns of 8")) +
     theme(legend.position = "bottom")
