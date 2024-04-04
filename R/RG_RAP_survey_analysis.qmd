@@ -9,7 +9,8 @@ format:
 
 ## Introduction
 
-This Quarto document analyses the 2023 (early 2024) RAP Survey results for the Regions Group division.
+This Quarto document analyses the 2023 (early 2024) RAP Survey results for the 
+Regions Group division (Data and Analysis Unit).
 The areas focused on are:
 
 - Most common/important needs in your area
@@ -74,14 +75,17 @@ num_rg_resp <- nrow(division_data_full)
 ```
 
 
-There were `r num_rg_resp` responses, of which came from `r length(unique(division_data$Email))` different respondents.
+There were `r num_rg_resp` responses, of which came from 
+`r length(unique(division_data$Email))` different respondents.
 
 
 ## Most common needs
 
-Below is a bar chart of the survey questions which related to why people need RAP.
+Below is a bar chart of the survey questions which relate to why people need RAP.
 The answers to the questions were a ranking from Strongly disagree to Neutral to Strongly agree.
 A bi-polar Likert scale is used (Disagreement is negative, Neutral is 0 and Agreement is positive).
+
+***This scale type is used throughout (unless the answers are counted).***
 
 ---
 
@@ -155,7 +159,9 @@ div_data_num_long |>
 
 ```
 
-<br>
+
+The need for RAP is largely for analysis that is repeated or for automating
+QA processes.
 
 It should be noted that "I am confident that someone else could run the 
 majority of my teams' analytical processes from start to finish without any 
@@ -210,21 +216,19 @@ division_data |>
 
 ```
 
-<br>
 
 The responses are relatively polarised, with no neutral responses.
 The majority of respondents agreed they use code but a fairly high number 
 disagree.
-In line with RAP a goal should be to try and upskill the non-coders.
+In line with RAP, a goal should be to try and upskill the non-coders.
 
 
 ---
 
 <br>
 
-The data is subset to include only those people who agreed with the 
-"I regularly perform analysis using code" statement.
-This is done to analyse the code-related questions.
+To analyse the code-related questions, tje data is subset to include only those 
+people who agreed with the "I regularly perform analysis using code" statement.
 
 ---
 
@@ -247,7 +251,7 @@ division_data |>
   scale_fill_manual(values = likert_colours) +
   scale_x_discrete(labels = function(x) insert_line_breaks(x, freq = 1)) +
   labs(
-    title = "Coders are less comfortable with version control and open-sourcing\n",
+    title = "Coders are less comfortable with version control and open sourcing\n",
     subtitle = paste0("Bar charts showing count of coders* who reponded to the",
                       " code related questions\ngrouped by response.\n"),
     caption = paste0("*coders means only those who agreed with the following statement\n",
@@ -265,7 +269,13 @@ division_data |>
 
 ```
 
-<br>
+
+Coders are comfortable using code and open source tools to complete analysis.
+However, are less happy with using version control and eventually open-sourcing 
+their code.
+This final point is a relatively advanced topic so is not a major concern.
+
+---
 
 ## RAP specific
 
@@ -319,7 +329,13 @@ div_data_num_long |>
   )
 ```
 
-<br>
+
+People understand that RAP is useful for producing analysis and feel they are
+supported by their manager to implement it.
+But, there is a consensus that the skills, time and support to implement
+RAP are lacking.
+Also, there is a strong perception that managers are not necessarily telling
+their colleagues to actively implement RAP.
 
 ---
 
@@ -395,7 +411,16 @@ div_rap_data_num_long |>
   ) 
 ```
 
-<br>
+
+Both coders and non-coders agree that RAP is useful.
+There is an expected difference between the two groups that coders are 
+more favourable to RAP.
+
+The differences between the two groups widen significantly when it comes to
+actually implementing, using and having the support for RAP.
+Again, to be expected but of concern that one group may be left behind.
+
+---
 
 ## Line manager specific
 
@@ -411,7 +436,7 @@ A lollipop plot is used again to summarise the average response rankings to the 
 #| out-width: 90%
 #| fig-align: center
 
-lm_qs <- original_names[25:42]
+lm_qs <- original_names[26:42]
 
 # Lollipop plot to visualise how coders compare to non coders on RAP
 bi_division_data_numerical |> 
@@ -453,7 +478,13 @@ bi_division_data_numerical |>
   )
 ```
 
-<br>
+
+Managers are very confident in their team to implement RAP and perform analysis.
+However, are a lot less confident in their own knowledge of RAP, where to find
+out more information, support from senior leaders and finally reviewing code.
+
+
+---
 
 ## Qualitiative data
 
@@ -492,7 +523,6 @@ clean_word_col(division_data, "factors_limiting_reproducibility") |>
 
 ```
 
-<br>
 
 Key points from visual analysis:
 
@@ -624,8 +654,8 @@ analytical projects.
 
 The major issue is buy-in.
 For the analyst this is in time.
-For managers it stems from not rally understanding how RAP is implemented, 
-thus not being able to provided the resources (including time) to the analysts.
+For managers it stems from not fully understanding how RAP is implemented, 
+thus not being able to provide the resources (including time) to the analysts.
 Customers should also factor in the requirement of RAP.
 
 Some analysts still need to be captured in the upskilling of code.
@@ -652,7 +682,7 @@ resources available for this - but which to use needs to be made clear).
 An agreed consistent and unit-wide approach to analytical projects should be 
 formalised:
 
-- Structure of folders
+- Structure of folders (Now a package for this - [dauRtemplate]({{<url_dauRtemplate>}}))
 - Documentation to be included
 - Minimum QA processes
 - Shared packages and functions
